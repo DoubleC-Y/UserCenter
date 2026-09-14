@@ -19,7 +19,9 @@ mybatis-plus:
       logic-delete-value: 1
       logic-not-delete-value: 0
   configuration:
-    map-underscore-to-camel-case: false
+    # 实体字段是驼峰、数据库列是下划线，开启下划线转驼峰自动映射：
+    # work_status → workStatus、create_time → createTime 这类列名在 XML 手写查询 / resultType 自动映射下也能对应上
+    map-underscore-to-camel-case: true
 
 server:
   port: 8080

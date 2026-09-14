@@ -40,4 +40,9 @@ class UserServiceTest {
         assertTrue(result > 0);
         System.out.println(result);
     }
+
+    @Test
+    void login() {
+
+    }
 }

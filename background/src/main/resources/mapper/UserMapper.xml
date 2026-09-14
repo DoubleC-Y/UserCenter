@@ -15,9 +15,9 @@
             <result property="avatar" column="avatar" />
             <result property="intro" column="intro" />
             <result property="enabled" column="enabled" />
-            <result property="work_status" column="work_status" />
-            <result property="create_time" column="create_time" />
-            <result property="update_time" column="update_time" />
+            <result property="workStatus" column="work_status" />
+            <result property="createTime" column="create_time" />
+            <result property="updateTime" column="update_time" />
             <result property="deleted" column="deleted" />
     </resultMap>
 

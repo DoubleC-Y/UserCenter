@@ -1,6 +1,7 @@
 package com.example.background.model.domain;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -67,20 +68,21 @@ public class User {
     /**
      * 人员状态:1在职,2离职
      */
-    private Integer work_status;
+    private Integer workStatus;
 
     /**
      * 创建时间
      */
-    private Date create_time;
+    private Date createTime;
 
     /**
      * 更新时间
      */
-    private Date update_time;
+    private Date updateTime;
 
     /**
      * 逻辑删除:0未删除,1已删除
      */
+    @TableLogic
     private Integer deleted;
 }

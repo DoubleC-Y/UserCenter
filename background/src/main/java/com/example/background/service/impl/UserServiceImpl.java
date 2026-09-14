@@ -6,6 +6,8 @@ import com.example.background.mapper.UserMapper;
 import com.example.background.model.domain.User;
 import com.example.background.service.UserService;
 import com.example.background.utils.PasswordUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.regex.Pattern;
@@ -16,6 +18,7 @@ import java.util.regex.Pattern;
 * @createDate 2026-09-13 22:40:07
 */
 @Service
+@Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     implements UserService{
 
@@ -24,6 +27,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * 与 user.account 的 CHECK 约束（^[0-9]+$）以及 varchar(20) 列宽保持一致
      */
     private static final Pattern ACCOUNT_PATTERN = Pattern.compile("[0-9]{4,20}");
+
+    private static final String USER_LOGIN_STATE = "userLoginState";
 
     @Override
     public long register(String userAccount, String userPassword, String checkPassword) {
@@ -41,8 +46,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (!userPassword.equals(checkPassword)) {
             return -1;
         }
-        // 密码长度校验
-        if (userPassword.length() < 8) {
+        // 账号和密码长度校验
+        if (userAccount.length() < 4 || userPassword.length() < 8) {
             return -1;
         }
         // 账号重复校验：唯一一次数据库访问，放在所有纯内存校验之后
@@ -62,6 +67,48 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return -1;
         }
         return user.getId();
+    }
+
+    @Override
+    public User login(String userAccount, String userPassword, HttpServletRequest httpServletRequest) {
+        // 1. 校验，与注册的校验逻辑基本一致
+        if (userAccount == null || userPassword == null || userAccount.isBlank() || userPassword.isBlank()) {
+            return null;
+        }
+        // 账号格式校验：长度与字符合并成一次正则，不合法就没必要再往后走
+        if (!ACCOUNT_PATTERN.matcher(userAccount).matches()) {
+            return null;
+        }
+        // 账号和密码长度校验
+        if (userAccount.length() < 4 || userPassword.length() < 8) {
+            return null;
+        }
+        // 2. 查询用户：查询条件只用 account，密码绝不能参与查询条件
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("account", userAccount);
+        User user = this.baseMapper.selectOne(queryWrapper);
+        // 3. 密码校验：摘要里的盐是随机的，同一明文每次密文都不同，
+        //    所以必须用 matches 重新计算后比对，不能把明文加密再拿去查库
+        if (user == null || !PasswordUtil.matches(userPassword, user.getPassword())) {
+            log.info("登录失败，账号或密码错误");
+            return null;
+        }
+        // 4. 数据脱敏：只回传 id,name,account,age,email,phone,avatar,intro,enabled,workStatus,createTime，不含密码摘要
+        User desensitizedUser = new User();
+        desensitizedUser.setId(user.getId());
+        desensitizedUser.setName(user.getName());
+        desensitizedUser.setAccount(user.getAccount());
+        desensitizedUser.setAge(user.getAge());
+        desensitizedUser.setPhone(user.getPhone());
+        desensitizedUser.setEmail(user.getEmail());
+        desensitizedUser.setAvatar(user.getAvatar());
+        desensitizedUser.setIntro(user.getIntro());
+        desensitizedUser.setEnabled(user.getEnabled());
+        desensitizedUser.setWorkStatus(user.getWorkStatus());
+        desensitizedUser.setCreateTime(user.getCreateTime());
+        // 5. 记录用户登录态：存脱敏后的对象，避免密码摘要被带进 session
+        httpServletRequest.getSession().setAttribute(USER_LOGIN_STATE, desensitizedUser);
+        return desensitizedUser;
     }
 }
 
