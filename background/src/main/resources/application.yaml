@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: background
+  #DataSource Config
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/usercenter?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&allowMultiQueries=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: '@Jifengyongshi012'
+
+#MyBatis-Plus Config
+mybatis-plus:
+  global-config:
+    db-config:
+      # 主键策略：雪花 ID，应用侧生成，不依赖数据库自增
+      id-type: assign_id
+      # 逻辑删除：deleted = 0 未删除，1 已删除；所有查询自动追加 AND deleted = 0
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: false
+
+server:
+  port: 8080
