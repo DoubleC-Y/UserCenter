@@ -162,22 +162,25 @@ export default defineConfig({
   ],
 
   //================ pro 插件配置 =================
-  plugins: ['@umijs/max-plugin-openapi'],
+  // openAPI 插件依赖本地 schema 文件（config/oneapi.json）在启动时生成 service/mock。
+  // 当前项目的 src/services 为手写维护，且未提供该 schema，故先关闭插件，避免启动报错。
+  // 如需重新启用：准备 config/oneapi.json 或改为在线 schema，并放开下面两处注释。
+  // plugins: ['@umijs/max-plugin-openapi'],
 
   /**
    * @name openAPI 插件的配置
    * @description 基于 openapi 的规范生成serve 和mock，能减少很多样板代码
    * @doc https://pro.ant.design/zh-cn/docs/openapi/
    */
-  openAPI: [
-    {
-      requestLibPath: "import { request } from '@umijs/max'",
-      // 或者使用在线的版本
-      // schemaPath: "https://gw.alipayobjects.com/os/antfincdn/M%24jrzTTYJN/oneapi.json"
-      schemaPath: join(__dirname, 'oneapi.json'),
-      mock: false,
-    },
-  ],
+  // openAPI: [
+  //   {
+  //     requestLibPath: "import { request } from '@umijs/max'",
+  //     // 或者使用在线的版本
+  //     // schemaPath: "https://gw.alipayobjects.com/os/antfincdn/M%24jrzTTYJN/oneapi.json"
+  //     schemaPath: join(__dirname, 'oneapi.json'),
+  //     mock: false,
+  //   },
+  // ],
 
   mock: {},
   /**

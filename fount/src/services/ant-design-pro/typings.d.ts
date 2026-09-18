@@ -23,10 +23,35 @@ declare namespace API {
     phone?: string;
   };
 
+  /**
+   * 登录接口 POST /user/login 的返回体
+   * 后端已对 User 做脱敏：只回传可外发字段，不含 password / updateTime / deleted
+   */
   type LoginResult = {
-    status?: string;
-    type?: string;
-    currentAuthority?: string;
+    /** 主键ID */
+    id?: number;
+    /** 姓名 */
+    name?: string;
+    /** 登录账号：仅数字 */
+    account?: string;
+    /** 年龄 */
+    age?: number;
+    /** 邮箱 */
+    email?: string;
+    /** 手机号 */
+    phone?: string;
+    /** 头像URL */
+    avatar?: string;
+    /** 个人简介 */
+    intro?: string;
+    /** 是否启用：1启用，0停用 */
+    enabled?: number;
+    /** 人员状态：1在职，2离职 */
+    workStatus?: number;
+    /** 角色：0普通用户，1管理员 */
+    role?: number;
+    /** 创建时间 */
+    createTime?: string;
   };
 
   type PageParams = {
@@ -61,11 +86,15 @@ declare namespace API {
     status?: string;
   };
 
+  /**
+   * 登录接口 POST /user/login 的请求体
+   * 字段名与后端 UserLoginRequest 保持一致
+   */
   type LoginParams = {
-    username?: string;
-    password?: string;
-    autoLogin?: boolean;
-    type?: string;
+    /** 用户账号 */
+    userAccount?: string;
+    /** 用户密码 */
+    userPassword?: string;
   };
 
   type ErrorResponse = {

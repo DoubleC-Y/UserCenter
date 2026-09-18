@@ -1,25 +1,12 @@
-import {
-  AlipayCircleOutlined,
-  LockOutlined,
-  MobileOutlined,
-  TaobaoCircleOutlined,
-  UserOutlined,
-  WeiboCircleOutlined,
-} from '@ant-design/icons';
-import {
-  LoginForm,
-  ProFormCaptcha,
-  ProFormCheckbox,
-  ProFormText,
-} from '@ant-design/pro-components';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { LoginForm, ProFormText } from '@ant-design/pro-components';
 import { Helmet, useModel } from '@umijs/max';
 
-import { Alert, App, Button, Tabs } from 'antd';
+import { Alert, App, Button } from 'antd';
 import { createStyles } from 'antd-style';
 import React, { startTransition, useState } from 'react';
 import { Footer } from '@/components';
 import { login } from '@/services/ant-design-pro/api';
-import { getFakeCaptcha } from '@/services/ant-design-pro/login';
 import Settings from '../../../../config/defaultSettings';
 
 /**
@@ -40,30 +27,8 @@ const getSafeRedirectUrl = (redirect: string | null): string => {
   }
 };
 
-const useStyles = createStyles(({ token }) => {
+const useStyles = createStyles(() => {
   return {
-    action: {
-      marginLeft: '8px',
-      color: 'rgba(0, 0, 0, 0.2)',
-      fontSize: '24px',
-      verticalAlign: 'middle',
-      cursor: 'pointer',
-      transition: 'color 0.3s',
-      '&:hover': {
-        color: token.colorPrimaryActive,
-      },
-    },
-    lang: {
-      width: 42,
-      height: 42,
-      lineHeight: '42px',
-      position: 'fixed',
-      right: 16,
-      borderRadius: token.borderRadius,
-      ':hover': {
-        backgroundColor: token.colorBgTextHover,
-      },
-    },
     container: {
       display: 'flex',
       flexDirection: 'column',
@@ -75,29 +40,6 @@ const useStyles = createStyles(({ token }) => {
     },
   };
 });
-
-const ActionIcons = () => {
-  const { styles } = useStyles();
-
-  return (
-    <>
-      <AlipayCircleOutlined
-        key="AlipayCircleOutlined"
-        className={styles.action}
-      />
-      <TaobaoCircleOutlined
-        key="TaobaoCircleOutlined"
-        className={styles.action}
-      />
-      <WeiboCircleOutlined
-        key="WeiboCircleOutlined"
-        className={styles.action}
-      />
-    </>
-  );
-};
-
-
 
 const LoginMessage: React.FC<{
   content: string;
@@ -115,8 +57,7 @@ const LoginMessage: React.FC<{
 };
 
 const Login: React.FC = () => {
-  const [userLoginState, setUserLoginState] = useState<API.LoginResult>({});
-  const [type, setType] = useState<string>('account');
+  const [loginFailed, setLoginFailed] = useState<boolean>(false);
   const { initialState, setInitialState } = useModel('@@initialState');
   const { styles } = useStyles();
   const { message } = App.useApp();
@@ -135,9 +76,9 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (values: API.LoginParams) => {
     try {
-      // 登录
-      const msg = await login({ ...values, type });
-      if (msg.status === 'ok') {
+      // 登录：成功时后端返回脱敏后的 User，失败时返回 null
+      const msg = await login({ ...values });
+      if (msg?.id) {
         const defaultLoginSuccessMessage = '登录成功！';
         message.success(defaultLoginSuccessMessage);
         await fetchUserInfo();
@@ -146,14 +87,13 @@ const Login: React.FC = () => {
         window.location.href = redirectUrl;
         return;
       }
-      // 如果失败去设置用户错误信息
-      setUserLoginState(msg);
+      // 如果失败去设置登录错误状态
+      setLoginFailed(true);
     } catch {
       const defaultLoginFailureMessage = '登录失败，请重试！';
       message.error(defaultLoginFailureMessage);
     }
   };
-  const { status, type: loginType } = userLoginState;
 
   return (
     <div className={styles.container}>
@@ -175,148 +115,50 @@ const Login: React.FC = () => {
             maxWidth: '75vw',
           }}
           logo={<img alt="logo" src="/logo.svg" />}
-          title="Ant Design"
-          subTitle={'Ant Design 是西湖区最具影响力的 Web 设计规范'}
-          initialValues={{
-            autoLogin: true,
-          }}
-          actions={[
-            'loginWith',
-            <ActionIcons key="icons" />,
-          ]}
+          title="User Center"
+          subTitle={'User Center 是用户管理系统Demo'}
           onFinish={async (values) => {
             await handleSubmit(values as API.LoginParams);
           }}
         >
-          <Tabs
-            activeKey={type}
-            onChange={setType}
-            centered
-            items={[
+          {loginFailed && (
+            <LoginMessage
+              content={'错误的账号或密码'}
+            />
+          )}
+          <ProFormText
+            name="userAccount"
+            fieldProps={{
+              size: 'large',
+              prefix: <UserOutlined />,
+            }}
+            placeholder={'账号'}
+            rules={[
               {
-                key: 'account',
-                label: '账户密码登录',
-              },
-              {
-                key: 'mobile',
-                label: '手机号登录',
+                required: true,
+                message: '账号是必填项！',
               },
             ]}
           />
-
-          {status === 'error' && loginType === 'account' && (
-            <LoginMessage
-              content={'错误的用户名和密码(admin/ant.design)'}
-            />
-          )}
-          {type === 'account' && (
-            <>
-              <ProFormText
-                name="username"
-                fieldProps={{
-                  size: 'large',
-                  prefix: <UserOutlined />,
-                }}
-                placeholder={'用户名: admin or user'}
-                rules={[
-                  {
-                    required: true,
-                    message: (
-                      '用户名是必填项！'
-                    ),
-                  },
-                ]}
-              />
-              <ProFormText.Password
-                name="password"
-                fieldProps={{
-                  size: 'large',
-                  prefix: <LockOutlined />,
-                }}
-                placeholder={'密码: ant.design'}
-                rules={[
-                  {
-                    required: true,
-                    message: (
-                      '密码是必填项！'
-                    ),
-                  },
-                ]}
-              />
-            </>
-          )}
-
-          {status === 'error' && loginType === 'mobile' && (
-            <LoginMessage content="验证码错误" />
-          )}
-          {type === 'mobile' && (
-            <>
-              <ProFormText
-                fieldProps={{
-                  size: 'large',
-                  prefix: <MobileOutlined />,
-                }}
-                name="mobile"
-                placeholder={'请输入手机号！'}
-                rules={[
-                  {
-                    required: true,
-                    message: (
-                      '手机号是必填项！'
-                    ),
-                  },
-                  {
-                    pattern: /^1\d{10}$/,
-                    message: (
-                      '不合法的手机号！'
-                    ),
-                  },
-                ]}
-              />
-              <ProFormCaptcha
-                fieldProps={{
-                  size: 'large',
-                  prefix: <LockOutlined />,
-                }}
-                captchaProps={{
-                  size: 'large',
-                }}
-                placeholder={'请输入验证码！'}
-                captchaTextRender={(timing, count) => {
-                  if (timing) {
-                    return `${count} ${'秒后重新获取'}`;
-                  }
-                  return '获取验证码';
-                }}
-                name="captcha"
-                rules={[
-                  {
-                    required: true,
-                    message: (
-                      '验证码是必填项！'
-                    ),
-                  },
-                ]}
-                onGetCaptcha={async (phone) => {
-                  const result = await getFakeCaptcha({
-                    phone,
-                  });
-                  if (!result) {
-                    return;
-                  }
-                  message.success('获取验证码成功！验证码为：1234');
-                }}
-              />
-            </>
-          )}
+          <ProFormText.Password
+            name="userPassword"
+            fieldProps={{
+              size: 'large',
+              prefix: <LockOutlined />,
+            }}
+            placeholder={'密码'}
+            rules={[
+              {
+                required: true,
+                message: '密码是必填项！',
+              },
+            ]}
+          />
           <div
             style={{
               marginBottom: 24,
             }}
           >
-            <ProFormCheckbox noStyle name="autoLogin">
-              自动登录
-            </ProFormCheckbox>
             <Button
               type="link"
               style={{
@@ -324,7 +166,7 @@ const Login: React.FC = () => {
                 padding: 0,
               }}
             >
-              忘记密码 ?
+              注册
             </Button>
           </div>
         </LoginForm>

@@ -16,6 +16,7 @@
             <result property="intro" column="intro" />
             <result property="enabled" column="enabled" />
             <result property="workStatus" column="work_status" />
+            <result property="role" column="role" />
             <result property="createTime" column="create_time" />
             <result property="updateTime" column="update_time" />
             <result property="deleted" column="deleted" />
@@ -23,7 +24,7 @@
 
     <sql id="Base_Column_List">
         id,name,account,password,age,email,phone,avatar,
-        intro,enabled,work_status,create_time,update_time,
+        intro,enabled,work_status,role,create_time,update_time,
         deleted
     </sql>
 </mapper>

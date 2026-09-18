@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.spring.service.IService;
 import com.example.background.model.domain.User;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.List;
+
 /**
 * @author 10611
 * @description 针对表【user】的数据库操作Service
@@ -28,4 +30,17 @@ public interface UserService extends IService<User> {
      */
     User login(String userAccount, String userPassword, HttpServletRequest httpServletRequest);
 
+    /**
+     * 用户数据脱敏：拷出一个只含可外发字段的新对象
+     * @param user 原始用户
+     * @return 脱敏后的用户，入参为 null 时返回 null
+     */
+    User desensitizeUser(User user);
+
+    /**
+     * 搜索用户
+     * @param name 姓名关键字，为空时返回全量
+     * @return 脱敏后的用户列表
+     */
+    List<User> searchUser(String name);
 }

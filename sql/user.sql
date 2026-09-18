@@ -13,6 +13,8 @@
 --      插入时保持实体字段为 null，MyBatis-Plus 的 insert-strategy=not_null
 --      会跳过 null 字段，默认值才能生效
 --   5. deleted 配合 mybatis-plus.global-config.db-config.logic-delete-field 使用
+--   6. role 用 tinyint 而不是 ENUM：0普通用户 / 1管理员，后续要加 2、3、4、5... 只改注释即可，
+--      不动表结构；也因此刻意不加 CHECK 约束，免得每新增一种角色就要改一次 DDL
 -- =====================================================================
 
 -- 首次建库时按需放开：直接执行会清掉表现有数据
@@ -31,6 +33,7 @@ CREATE TABLE `user`
     `intro`       varchar(500)          DEFAULT NULL COMMENT '个人简介',
     `enabled`     tinyint      NOT NULL DEFAULT 1 COMMENT '是否启用:1启用,0停用',
     `work_status` tinyint      NOT NULL DEFAULT 1 COMMENT '人员状态:1在职,2离职',
+    `role`        tinyint      NOT NULL DEFAULT 0 COMMENT '角色:0普通用户,1管理员',
     `create_time` datetime(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
     `update_time` datetime(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
     `deleted`     tinyint      NOT NULL DEFAULT 0 COMMENT '逻辑删除:0未删除,1已删除',

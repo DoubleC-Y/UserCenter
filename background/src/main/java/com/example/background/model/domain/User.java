@@ -71,6 +71,11 @@ public class User {
     private Integer workStatus;
 
     /**
+     * 角色:0普通用户,1管理员
+     */
+    private Integer role;
+
+    /**
      * 创建时间
      */
     private Date createTime;

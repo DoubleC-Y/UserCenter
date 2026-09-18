@@ -11,31 +11,16 @@
  */
 export default {
   // 如果需要自定义本地开发服务器  请取消注释按需调整
-  // dev: {
-  //   // localhost:8000/api/** -> https://preview.pro.ant.design/api/**
-  //   '/api/': {
-  //     // 要代理的地址
-  //     target: 'https://preview.pro.ant.design',
-  //     // 配置了这个可以从 http 代理到 https
-  //     // 依赖 origin 的功能可能需要这个，比如 cookie
-  //     changeOrigin: true,
-  //   },
-  // },
-  /**
-   * @name 详细的代理配置
-   * @doc https://github.com/chimurai/http-proxy-middleware
-   */
-  test: {
-    // localhost:8000/api/** -> https://pro-api.ant-design-demo.workers.dev/api/**
+  dev: {
+    // localhost:8000/api/** -> http://localhost:8080/**（转发时去掉 /api 前缀）
     '/api/': {
-      target: 'https://pro-api.ant-design-demo.workers.dev',
+      // 要代理的地址（后端服务）
+      target: 'http://localhost:8080',
+      // 配置了这个可以从 http 代理到 https
+      // 依赖 origin 的功能可能需要这个，比如 cookie
       changeOrigin: true,
-    },
-  },
-  pre: {
-    '/api/': {
-      target: 'your pre url',
-      changeOrigin: true,
+      // 转发到后端时重写路径，去掉 /api 前缀
+      pathRewrite: { '^/api': '' },
     },
   },
 };
